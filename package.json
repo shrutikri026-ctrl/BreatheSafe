@@ -1,0 +1,21 @@
+{
+  "name": "aeroshield-ai",
+  "version": "1.0.0",
+  "description": "GenAI-Powered Winter Smog & Community Resilience Assistant",
+  "main": "serve.js",
+  "type": "module",
+  "scripts": {
+    "start": "node serve.js"
+  },
+  "keywords": [
+    "genai",
+    "air-quality",
+    "smog",
+    "pm25",
+    "corsi-rosenthal",
+    "environmental-health",
+    "gemini"
+  ],
+  "author": "AeroShield Team",
+  "license": "MIT"
+}

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BreatheSafe • Simple Winter Smog Guide for Families</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2226%22>🍃</text></svg>">
+</head>
+<body>
+  <div class="container">
+    <!-- Clean, Friendly Header -->
+    <header class="simple-header">
+      <div class="logo-group">
+        <div class="logo-icon">🍃</div>
+        <div class="logo-text">
+          <h1>BreatheSafe <span style="font-size:0.85rem; font-weight:normal; color:#38bdf8;">(वायु-कवच)</span></h1>
+          <p>Simple winter smog guide & AI helper for your family</p>
+        </div>
+      </div>
+
+      <div class="location-picker">
+        <select id="citySelect" aria-label="Select City">
+          <option value="delhi" selected>📍 Delhi-NCR (AQI 438 • Severe)</option>
+          <option value="lahore">📍 Lahore (AQI 472 • Toxic)</option>
+          <option value="beijing">📍 Beijing (AQI 184 • Smog)</option>
+          <option value="krakow">📍 Kraków (AQI 168 • Smog)</option>
+          <option value="saltlake">📍 Salt Lake City (AQI 148 • Inversion)</option>
+          <option value="milan">📍 Milan (AQI 142 • Inversion)</option>
+          <option value="clean_baseline">📍 Zurich (AQI 22 • Clean)</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Simple Navigation Tabs -->
+    <nav class="simple-nav" role="tablist">
+      <button class="nav-item active" data-tab="tab-today">☀️ Today's Advice</button>
+      <button class="nav-item" data-tab="tab-chat">💬 Ask AI Helper</button>
+      <button class="nav-item" data-tab="tab-hacks">💡 Easy Home Hacks</button>
+      <button class="nav-item" data-tab="tab-impact">📊 My Health Impact</button>
+      <button class="nav-item" data-tab="tab-api">🔌 REST API</button>
+    </nav>
+
+    <!-- TAB 1: TODAY'S ADVICE (Simple & Actionable) -->
+    <main id="tab-today" class="tab-panel active">
+      <!-- Big Hero Status Card -->
+      <div class="hero-status-card">
+        <div class="status-top-row">
+          <div class="status-badge danger" id="statusBadge">
+            <span>🔴</span> <span id="statusBadgeText">Stay Indoors (Severe Smog)</span>
+          </div>
+          <div class="aqi-pill">
+            Air Pollution Level: <strong id="heroAqiNumber">438</strong> AQI
+          </div>
+        </div>
+
+        <div class="status-main-message" id="heroMainMessage">
+          The air is heavily polluted right now. Keep your windows shut. The best safe window to air out rooms or step out is this afternoon.
+        </div>
+
+        <div class="status-timing-box">
+          <div class="timing-item">
+            <span class="tag green">Safe Window</span>
+            <span>Open windows / errands: <strong id="heroSafeWindow" style="color:#34d399;">1:30 PM – 3:00 PM</strong></span>
+          </div>
+          <div class="timing-item">
+            <span class="tag red">Danger Hours</span>
+            <span>Keep doors closed: <strong id="heroDangerHours" style="color:#f87171;">6:00 AM – 9:30 AM & 7:30 PM – 10:00 PM</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick 1-Click Family Profile -->
+      <div class="card">
+        <div class="card-title">👨‍👩‍👧 Customize for your family</div>
+        <p class="card-subtitle">Click the buttons below to personalize today's safety steps:</p>
+        
+        <div style="font-size:0.82rem; font-weight:700; color:#94a3b8; text-transform:uppercase;">Who is in your home?</div>
+        <div class="profile-toggles">
+          <div class="toggle-chip" data-key="hasInfants">👶 Baby / Toddler</div>
+          <div class="toggle-chip active" data-key="hasElderly">👵 Elder (65+)</div>
+          <div class="toggle-chip active" data-key="hasAsthmatic">🫁 Asthma / Cough</div>
+          <div class="toggle-chip" data-key="hasPets">🐕 Family Pet</div>
+        </div>
+
+        <div style="font-size:0.82rem; font-weight:700; color:#94a3b8; text-transform:uppercase; margin-top:1rem;">How do you travel?</div>
+        <div class="profile-toggles">
+          <div class="toggle-chip active" data-commute="bike">🛵 Scooter / Bike</div>
+          <div class="toggle-chip" data-commute="car">🚗 Car (with AC)</div>
+          <div class="toggle-chip" data-commute="bus">🚌 Bus / Auto</div>
+          <div class="toggle-chip" data-commute="walk">🚶 Walk / Cycle</div>
+          <div class="toggle-chip" data-commute="wfh">🏠 Work from Home</div>
+        </div>
+      </div>
+
+      <!-- 3 Simple Steps For Today -->
+      <div class="card">
+        <div class="card-title">📋 3 Simple steps for your day</div>
+        <div class="steps-grid" id="stepsGrid">
+          <div class="step-card">
+            <div class="step-time">🌅 Morning (Before 10 AM)</div>
+            <div class="step-title" id="stepMorningTitle">Seal doors & commute with N95</div>
+            <div class="step-desc" id="stepMorningDesc">
+              Cold morning air traps vehicle smoke at street level. Keep doors and windows closed. If commuting by scooter or walking, wear a tightly fitted N95 mask.
+            </div>
+          </div>
+
+          <div class="step-card" style="border-color:rgba(16,185,129,0.3); background:rgba(16,185,129,0.04);">
+            <div class="step-time" style="color:#34d399;">☀️ Afternoon (1:30 - 3:00 PM)</div>
+            <div class="step-title">Safe air window: air out rooms</div>
+            <div class="step-desc">
+              Afternoon sunshine warms the ground and temporarily lifts the smog blanket. Crack open windows for 15-20 minutes to let fresh oxygen in. Do any outdoor chores now.
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-time">🌙 Evening & Night</div>
+            <div class="step-title">Bedtime clean air routine</div>
+            <div class="step-desc" id="stepNightDesc">
+              Smog settles back down after sunset. Wet-mop bedroom floors to catch dust. Keep an air purifier or DIY filter running in the bedroom, and place a small bowl of water near the heater so your throat doesn't dry out.
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TAB 2: ASK AI HELPER ("AURA") -->
+    <section id="tab-chat" class="tab-panel">
+      <div class="card" style="margin-bottom:0.75rem;">
+        <div class="card-title">💬 Ask Aura (Your AI Clean Air Assistant)</div>
+        <p class="card-subtitle" style="margin-bottom:0;">
+          Ask questions in plain English or Hindi. Aura knows your city's current air quality and family needs.
+        </p>
+      </div>
+
+      <div class="chat-box">
+        <div class="chat-history" id="chatHistory">
+          <div class="chat-msg assistant">
+            <strong>Hi there! I am Aura, your clean air guide.</strong>
+            <p style="margin-top:0.35rem;">
+              Current air quality in <span id="chatCityName">Delhi-NCR</span> is <strong id="chatAqiText">Hazardous (438 AQI)</strong>.
+            </p>
+            <p style="margin-top:0.35rem;">
+              How can I help protect your home today? You can click a question below or type your own!
+            </p>
+          </div>
+        </div>
+
+        <!-- 4 Simple One-Click Questions -->
+        <div class="chat-prompts-row">
+          <button class="prompt-btn">😷 Which mask works best for my kids?</button>
+          <button class="prompt-btn">🛠️ How to make a cheap $35 air filter?</button>
+          <button class="prompt-btn">🫁 What helps an itchy throat or dry cough?</button>
+          <button class="prompt-btn">🕯️ Are incense or candles bad in winter?</button>
+        </div>
+
+        <div class="chat-input-row">
+          <input type="text" id="simpleChatInput" placeholder="Ask anything about smog, masks, heating, or coughs..." autocomplete="off">
+          <button class="btn-send" id="btnSimpleSend">Ask</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: EASY HOME HACKS & SWAPS -->
+    <section id="tab-hacks" class="tab-panel">
+      <!-- The DIY Corsi-Rosenthal Box (Made super simple) -->
+      <div class="card" style="border-color:rgba(56,189,248,0.3); background:rgba(56,189,248,0.03);">
+        <div class="card-title">🛠️ The 15-Minute DIY Air Purifier (Corsi-Rosenthal Box)</div>
+        <p class="card-subtitle">
+          Commercial air purifiers cost $300+. You can make one yourself for under $40 that cleans your room 3x faster!
+        </p>
+
+        <div class="steps-grid" style="margin-top:0.75rem;">
+          <div class="step-card">
+            <div class="step-time">What You Need ($35 - $45)</div>
+            <div class="step-title">Simple Materials</div>
+            <div class="step-desc">
+              • 1 standard 20-inch box fan ($20)<br>
+              • 4 furnace filters (MERV 13 grade, $20)<br>
+              • 1 roll of duct tape + cardboard box
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-time">How to Build (15 Minutes)</div>
+            <div class="step-title">Tape Filters in a Cube</div>
+            <div class="step-desc">
+              1. Stand the 4 filters in a square cube with airflow arrows pointing <strong>inward</strong>.<br>
+              2. Tape a cardboard bottom.<br>
+              3. Place the box fan on top, blowing clean air <strong>upward</strong> into the room.<br>
+              4. Tape all edges tight.
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-time">Why It Works</div>
+            <div class="step-title">Cleaner Than $300 Units</div>
+            <div class="step-desc">
+              Having 4 large filters lets massive amounts of air pass through without motor strain. It scrubs a bedroom in just 15 minutes!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Free Household Hacks -->
+      <div class="card">
+        <div class="card-title">💡 4 Free Home Hacks (Cost $0)</div>
+        <div class="simple-hacks-grid">
+          <div class="simple-hack-item">
+            <div class="hack-tag">Cleaning Hack</div>
+            <div class="hack-item-title">1. Always Wet-Mop (Never Dry Sweep)</div>
+            <div class="hack-item-body">
+              Sweeping with a dry broom kicks fine smoke dust right back up into your breathing zone. Wipe floors with a damp cloth or wet mop to permanently trap dust.
+            </div>
+            <div class="hack-item-tip">💡 Tip: Add a drop of mild dish soap to the mop water to trap dust faster.</div>
+          </div>
+
+          <div class="simple-hack-item">
+            <div class="hack-tag">Draft Sealing Hack</div>
+            <div class="hack-item-title">2. Rolled Towel Door Snake</div>
+            <div class="hack-item-body">
+              Winter smoke seeps in through the gap under entrance and balcony doors. Roll an old bathroom towel and press it firmly against the door bottom to stop smoke leaks.
+            </div>
+            <div class="hack-item-tip">💡 Tip: Tape plastic bubble wrap to drafty windows to insulate against cold and smoke.</div>
+          </div>
+
+          <div class="simple-hack-item">
+            <div class="hack-tag">Kitchen Hack</div>
+            <div class="hack-item-title">3. Cook on Back Burners</div>
+            <div class="hack-item-body">
+              Frying or gas cooking can spike indoor smoke to 500+ AQI. Always cook on the <strong>rear burners</strong> under your exhaust fan, and keep pots covered with lids.
+            </div>
+            <div class="hack-item-tip">💡 Tip: Turn on the kitchen exhaust 2 minutes before lighting the stove.</div>
+          </div>
+
+          <div class="simple-hack-item">
+            <div class="hack-tag">Breathing Hack</div>
+            <div class="hack-item-title">4. Simple Water Bowl on Heater</div>
+            <div class="hack-item-body">
+              Room heaters make air bone-dry, paralyzing your nasal filters. Place a simple metal or ceramic bowl of water on top of your radiator to gently add moisture.
+            </div>
+            <div class="hack-item-tip">💡 Warning: Don't use tap water in ultrasonic mist makers; it creates white mineral dust!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 Life-Saving Swaps -->
+      <div class="card">
+        <div class="card-title">🌱 2 Important Clean Swaps</div>
+        <div class="simple-hacks-grid">
+          <div class="simple-hack-item">
+            <div class="hack-tag" style="color:#f87171;">Heating Safety</div>
+            <div class="hack-item-title">🚫 Never sleep with coal/wood fires indoors</div>
+            <div class="hack-item-body">
+              Burning coal (*angithi*) or wood in a closed bedroom creates invisible, deadly <strong>Carbon Monoxide (CO)</strong>. Use an electric oil heater or hot water bottles to stay warm safely.
+            </div>
+          </div>
+
+          <div class="simple-hack-item">
+            <div class="hack-tag" style="color:#34d399;">Neighborhood Action</div>
+            <div class="hack-item-title">🍂 Compost dry leaves instead of burning</div>
+            <div class="hack-item-body">
+              Burning a pile of dried leaves fills the street with thick cancer-causing smoke. Rake leaves around tree bases as natural mulch instead.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: MY HEALTH IMPACT (Friendly & Encouraging) -->
+    <section id="tab-impact" class="tab-panel">
+      <div class="card">
+        <div class="card-title">📊 Your Clean Air Score</div>
+        <p class="card-subtitle">
+          See the direct positive impact on your lungs and health by following these simple daily steps:
+        </p>
+
+        <div class="slider-simple">
+          <label>
+            <span>Days you have followed these clean air tips:</span>
+            <strong id="impactDaysText" style="color:#38bdf8;">14 Days</strong>
+          </label>
+          <input type="range" id="impactDaysSlider" min="1" max="60" value="14">
+        </div>
+
+        <div class="impact-display">
+          <div class="impact-box">
+            <div class="impact-number" id="impactCigarettes" style="color:#fbbf24;">182</div>
+            <div class="impact-label">Cigarettes of smoke avoided</div>
+            <div class="impact-sub">Equivalent toxic smoke blocked from your lungs</div>
+          </div>
+
+          <div class="impact-box">
+            <div class="impact-number" id="impactDustMg" style="color:#f87171;">60 mg</div>
+            <div class="impact-label">Toxic fine soot blocked</div>
+            <div class="impact-sub">Prevented from entering your bloodstream</div>
+          </div>
+
+          <div class="impact-box">
+            <div class="impact-number" id="impactCo2Kg" style="color:#34d399;">45 kg</div>
+            <div class="impact-label">Community emissions saved</div>
+            <div class="impact-sub">By carpooling and avoiding open burning</div>
+          </div>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.25); border-left:3px solid #34d399; padding:0.85rem 1rem; border-radius:0 8px 8px 0; font-size:0.88rem; color:#cbd5e1; margin-top:1rem;">
+          ❤️ <strong>Every day counts:</strong> Wearing an N95 mask on your commute and running a simple DIY filter in your bedroom cuts over 85% of dangerous particles from entering your family's lungs!
+        </div>
+
+        <div style="margin-top:1.5rem; display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <button class="btn-action" onclick="window.print()">
+            🖨️ Print 1-Page Family Plan for Fridge
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: REST API & DEVELOPER INTEGRATION -->
+    <section id="tab-api" class="tab-panel">
+      <!-- Gemini GenAI Key Integration -->
+      <div class="card">
+        <div class="card-title">🔑 Google Gemini GenAI API Setup</div>
+        <p class="card-subtitle">
+          BreatheSafe works 100% out-of-the-box with its built-in neural assistant. You can optionally connect your live Google Gemini API key below:
+        </p>
+
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+          <input type="password" id="inputGeminiApiKey" placeholder="Enter Gemini API key (AIzaSy...)" style="flex:1; min-width:260px; padding:0.65rem 0.9rem; background:#1e293b; border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:white; outline:none;">
+          <button class="btn-send" id="btnSaveGeminiKey">Save Key</button>
+          <span id="geminiKeyStatus" style="font-size:0.85rem; color:#38bdf8; font-weight:600;">Status: Using Built-in Engine</span>
+        </div>
+        <p style="font-size:0.78rem; color:#64748b; margin-top:0.4rem;">Keys are stored locally in your browser's localStorage and never transmitted to external third parties.</p>
+      </div>
+
+      <!-- Backend REST API Endpoints -->
+      <div class="card">
+        <div class="card-title">🔌 Built-in REST API Endpoints</div>
+        <p class="card-subtitle">
+          When running <code>node serve.js</code>, this application serves a complete JSON REST API on port 3000 for developers, mobile apps, or WhatsApp alert bots:
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.88rem;">
+          <div style="background:#1e293b; padding:0.75rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <strong style="color:#34d399;">GET /api/aqi?city=delhi</strong>
+              <span style="font-size:0.75rem; color:#94a3b8;">Real-time Telemetry & Safe Windows</span>
+            </div>
+            <code style="font-size:0.78rem; color:#93c5fd;">curl http://localhost:3000/api/aqi?city=delhi</code>
+          </div>
+
+          <div style="background:#1e293b; padding:0.75rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <strong style="color:#60a5fa;">POST /api/recommendations</strong>
+              <span style="font-size:0.75rem; color:#94a3b8;">Tailored Family Smog Plan</span>
+            </div>
+            <code style="font-size:0.78rem; color:#93c5fd;">curl -X POST http://localhost:3000/api/recommendations -H "Content-Type: application/json" -d '{"city":"delhi","profile":{"hasAsthmatic":true,"commute":"bike"}}'</code>
+          </div>
+
+          <div style="background:#1e293b; padding:0.75rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <strong style="color:#fbbf24;">POST /api/impact</strong>
+              <span style="font-size:0.75rem; color:#94a3b8;">Calculate Cigarettes & Dust Avoided</span>
+            </div>
+            <code style="font-size:0.78rem; color:#93c5fd;">curl -X POST http://localhost:3000/api/impact -H "Content-Type: application/json" -d '{"city":"delhi","days":14,"maskAdherence":90}'</code>
+          </div>
+
+          <div style="background:#1e293b; padding:0.75rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <strong style="color:#f472b6;">POST /api/chat</strong>
+              <span style="font-size:0.75rem; color:#94a3b8;">Ask Aura AI Programmatically</span>
+            </div>
+            <code style="font-size:0.78rem; color:#93c5fd;">curl -X POST http://localhost:3000/api/chat -H "Content-Type: application/json" -d '{"message":"What mask for my toddler?","city":"delhi"}'</code>
+          </div>
+        </div>
+
+        <!-- Live API Tester -->
+        <div style="margin-top:1.25rem;">
+          <div style="font-weight:700; font-size:0.85rem; color:#94a3b8; text-transform:uppercase; margin-bottom:0.5rem;">Live API Tester (Click to query backend):</div>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem;">
+            <button class="btn-action" id="btnTestAqi">Test GET /api/aqi</button>
+            <button class="btn-action" id="btnTestRec">Test POST /api/recommendations</button>
+            <button class="btn-action" id="btnTestImpact">Test POST /api/impact</button>
+          </div>
+          <pre id="apiTestOutput" style="background:#090d16; border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.85rem; font-size:0.8rem; color:#38bdf8; max-height:220px; overflow-y:auto;">Click a test button above to query the live API endpoint...</pre>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="bundle.js?v=20261120"></script>
+</body>
+</html>
