@@ -92,6 +92,13 @@ header.simple-header {
   color: var(--text-secondary);
 }
 
+.location-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .location-picker select {
   background: var(--bg-card);
   color: var(--text-primary);
@@ -101,6 +108,36 @@ header.simple-header {
   font-size: 0.9rem;
   outline: none;
   cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.location-picker select:focus {
+  border-color: var(--primary);
+}
+
+.btn-gps {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-gps:hover {
+  background: linear-gradient(135deg, #0369a1, #075985);
+  transform: translateY(-1px);
+}
+
+.btn-gps:active {
+  transform: translateY(0);
 }
 
 /* Simple Navigation Tabs */

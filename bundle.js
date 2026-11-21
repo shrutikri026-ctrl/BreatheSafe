@@ -370,6 +370,59 @@ Here is the direct practical guidance based on current air telemetry in **${city
 *Feel free to ask more specific questions about masks, DIY air cleaners, safe exercise, children's health, or symptoms!*`;
   }
 
+  // Live Telemetry Sync with Open-Meteo Air Quality API
+  async function syncLiveAqi(lat, lon, cityId) {
+    const liveBadge = document.getElementById("liveDataBadge");
+    try {
+      let url = "/api/aqi";
+      if (lat && lon) {
+        url = `/api/aqi?lat=${lat}&lon=${lon}`;
+      } else if (cityId) {
+        url = `/api/aqi?city=${cityId}`;
+      }
+
+      if (liveBadge) {
+        liveBadge.innerHTML = '<span>⏳</span> Syncing Live Sensors...';
+        liveBadge.style.color = '#94a3b8';
+      }
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        const cityKey = (lat && lon) ? "gps_user" : (cityId || state.cityId);
+
+        CITIES[cityKey] = {
+          name: data.city || (cityKey === "gps_user" ? "My GPS Location" : "Local City"),
+          aqi: data.aqi,
+          status: data.isDanger ? `Stay Indoors (${data.category})` : `Safe Air (${data.category})`,
+          isDanger: data.isDanger,
+          safeWindow: data.windows?.safeVentilationWindow || "1:00 PM – 3:00 PM",
+          dangerHours: data.windows?.dangerHours || "6:00 AM – 9:30 AM & 7:30 PM – 10:00 PM",
+          summary: data.healthAdvisory || `Live air quality telemetry: ${data.telemetry?.pm25_ug_m3} µg/m³ PM2.5, ${data.telemetry?.no2_ppb} ppb NO2.`,
+          pm25: data.telemetry?.pm25_ug_m3,
+          isLive: data.isLive
+        };
+
+        if (lat && lon) {
+          state.cityId = "gps_user";
+        }
+
+        updateHero();
+
+        if (liveBadge) {
+          liveBadge.innerHTML = `<span>🟢</span> Live Open-Meteo (${data.telemetry?.pm25_ug_m3 || data.aqi} µg/m³ PM2.5)`;
+          liveBadge.style.color = '#34d399';
+        }
+      }
+    } catch (e) {
+      console.warn("Could not sync live Open-Meteo telemetry:", e);
+      if (liveBadge) {
+        liveBadge.innerHTML = '<span>🔵</span> Built-in Model Feed';
+        liveBadge.style.color = '#60a5fa';
+      }
+    }
+  }
+
   // 5. Initialization & DOM Listeners
   document.addEventListener("DOMContentLoaded", () => {
     // City Selector
@@ -378,6 +431,54 @@ Here is the direct practical guidance based on current air telemetry in **${city
       citySelect.addEventListener("change", (e) => {
         state.cityId = e.target.value;
         updateHero();
+        syncLiveAqi(null, null, state.cityId);
+      });
+    }
+
+    // GPS Location Detector
+    const btnGps = document.getElementById("btnGpsLocation");
+    const gpsBtnText = document.getElementById("gpsBtnText");
+    const gpsIcon = document.getElementById("gpsIcon");
+
+    if (btnGps) {
+      btnGps.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser.");
+          return;
+        }
+
+        if (gpsBtnText) gpsBtnText.textContent = "Detecting...";
+        if (gpsIcon) gpsIcon.textContent = "⏳";
+
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            await syncLiveAqi(lat, lon);
+
+            // Add or select GPS option in citySelect
+            if (citySelect) {
+              let gpsOption = citySelect.querySelector('option[value="gps_user"]');
+              if (!gpsOption) {
+                gpsOption = document.createElement("option");
+                gpsOption.value = "gps_user";
+                citySelect.insertBefore(gpsOption, citySelect.firstChild);
+              }
+              gpsOption.textContent = `🎯 My GPS Location (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`;
+              gpsOption.selected = true;
+            }
+
+            if (gpsBtnText) gpsBtnText.textContent = "GPS Active";
+            if (gpsIcon) gpsIcon.textContent = "📍";
+          },
+          (err) => {
+            console.warn("GPS Location error:", err.message);
+            alert("Could not detect GPS location. Please check browser location permissions.");
+            if (gpsBtnText) gpsBtnText.textContent = "My GPS";
+            if (gpsIcon) gpsIcon.textContent = "🎯";
+          },
+          { timeout: 10000, enableHighAccuracy: true }
+        );
       });
     }
 
@@ -595,6 +696,10 @@ Here is the direct practical guidance based on current air telemetry in **${city
       }
     }
 
+    const btnTestGps = document.getElementById("btnTestGps");
+    if (btnTestGps) {
+      btnTestGps.addEventListener("click", () => testApiCall("/api/aqi?lat=28.6139&lon=77.2090"));
+    }
     if (btnTestAqi) {
       btnTestAqi.addEventListener("click", () => testApiCall(`/api/aqi?city=${state.cityId}`));
     }
@@ -611,7 +716,8 @@ Here is the direct practical guidance based on current air telemetry in **${city
       }));
     }
 
-    // Initial render
+    // Initial render & sync live Open-Meteo telemetry
     updateHero();
+    syncLiveAqi(null, null, state.cityId);
   });
 })();

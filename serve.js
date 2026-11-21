@@ -33,12 +33,14 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
-// Built-in Atmospheric Data Repository
+// Built-in Atmospheric Data Repository (with GPS Coordinates for Live Sensor Feeds)
 const CITIES_DATA = {
   delhi: {
     id: "delhi",
     name: "Delhi-NCR",
     country: "India",
+    lat: 28.6139,
+    lon: 77.2090,
     aqi: 438,
     category: "Severe / Hazardous",
     isDanger: true,
@@ -56,6 +58,8 @@ const CITIES_DATA = {
     id: "lahore",
     name: "Lahore",
     country: "Pakistan",
+    lat: 31.5204,
+    lon: 74.3587,
     aqi: 472,
     category: "Off-Scale Hazardous",
     isDanger: true,
@@ -73,6 +77,8 @@ const CITIES_DATA = {
     id: "beijing",
     name: "Beijing",
     country: "China",
+    lat: 39.9042,
+    lon: 116.4074,
     aqi: 184,
     category: "Unhealthy (Heating Smog)",
     isDanger: true,
@@ -90,6 +96,8 @@ const CITIES_DATA = {
     id: "krakow",
     name: "Kraków",
     country: "Poland",
+    lat: 50.0647,
+    lon: 19.9450,
     aqi: 168,
     category: "Unhealthy (Solid Fuel Smog)",
     isDanger: true,
@@ -107,6 +115,8 @@ const CITIES_DATA = {
     id: "saltlake",
     name: "Salt Lake City",
     country: "USA",
+    lat: 40.7608,
+    lon: -111.8910,
     aqi: 148,
     category: "Sensitive Groups Alert",
     isDanger: false,
@@ -124,6 +134,8 @@ const CITIES_DATA = {
     id: "milan",
     name: "Milan",
     country: "Italy",
+    lat: 45.4642,
+    lon: 9.1900,
     aqi: 142,
     category: "Sensitive Groups Alert",
     isDanger: false,
@@ -141,6 +153,8 @@ const CITIES_DATA = {
     id: "clean_baseline",
     name: "Zurich",
     country: "Switzerland",
+    lat: 47.3769,
+    lon: 8.5417,
     aqi: 22,
     category: "Clean Benchmark",
     isDanger: false,
@@ -155,6 +169,65 @@ const CITIES_DATA = {
     sources: ["Clean Alpine Baseline"]
   }
 };
+
+// Calculate US AQI standard from PM2.5 concentration (EPA standard)
+function calculateUsAqi(pm25) {
+  const c = Math.round(pm25 * 10) / 10;
+  if (c <= 12.0) return Math.round(((50 - 0) / (12.0 - 0)) * (c - 0) + 0);
+  if (c <= 35.4) return Math.round(((100 - 51) / (35.4 - 12.1)) * (c - 12.1) + 51);
+  if (c <= 55.4) return Math.round(((150 - 101) / (55.4 - 35.5)) * (c - 35.5) + 101);
+  if (c <= 150.4) return Math.round(((200 - 151) / (150.4 - 55.5)) * (c - 55.5) + 151);
+  if (c <= 250.4) return Math.round(((300 - 201) / (250.4 - 150.5)) * (c - 150.5) + 201);
+  if (c <= 350.4) return Math.round(((400 - 301) / (350.4 - 250.5)) * (c - 250.5) + 301);
+  if (c <= 500.4) return Math.round(((500 - 401) / (500.4 - 350.5)) * (c - 350.5) + 401);
+  return 500;
+}
+
+// Open-Meteo Air Quality API Live Fetcher (100% Free, zero key required)
+async function fetchLiveOpenMeteo(lat, lon) {
+  try {
+    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm2_5,pm10,nitrogen_dioxide,us_aqi&timezone=auto`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timer);
+
+    if (res.ok) {
+      const data = await res.json();
+      const curr = data.current;
+      if (curr && typeof curr.pm2_5 === 'number') {
+        const pm25 = Math.round(curr.pm2_5 * 10) / 10;
+        const pm10 = curr.pm10 ? Math.round(curr.pm10 * 10) / 10 : Math.round(pm25 * 1.4);
+        const no2 = curr.nitrogen_dioxide ? Math.round(curr.nitrogen_dioxide * 10) / 10 : 38;
+        const aqi = curr.us_aqi || calculateUsAqi(pm25);
+
+        let category = "Good";
+        let isDanger = false;
+        if (aqi > 300) { category = "Severe / Hazardous"; isDanger = true; }
+        else if (aqi > 200) { category = "Very Unhealthy"; isDanger = true; }
+        else if (aqi > 150) { category = "Unhealthy (Smog Episode)"; isDanger = true; }
+        else if (aqi > 100) { category = "Unhealthy for Sensitive Groups"; isDanger = true; }
+        else if (aqi > 50) { category = "Moderate"; isDanger = false; }
+
+        return {
+          isLive: true,
+          source: "Open-Meteo Air Quality API (Real-Time Sensor & Satellite Feed)",
+          timestamp: curr.time || new Date().toISOString(),
+          aqi: aqi,
+          category: category,
+          isDanger: isDanger,
+          pm25: pm25,
+          pm10: pm10,
+          no2: no2,
+          coordinates: { latitude: data.latitude, longitude: data.longitude }
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Open-Meteo live feed unavailable, falling back:", err.message);
+  }
+  return null;
+}
 
 // Helper: parse JSON body from incoming POST requests
 function parseJsonBody(req) {
@@ -399,13 +472,14 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, {
       status: "online",
       name: "BreatheSafe & AeroShield REST API",
-      version: "2.0.0",
+      version: "2.1.0",
       timestamp: new Date().toISOString(),
-      description: "GenAI-powered environmental resilience API for winter smog, atmospheric telemetry, and personalized defense.",
+      description: "GenAI-powered environmental resilience API with Open-Meteo Real-Time GPS Telemetry and winter smog defense.",
       endpoints: [
         { method: "GET", path: "/api/status", description: "API health, uptime, and available routes" },
-        { method: "GET", path: "/api/cities", description: "Get list of all supported cities and overview telemetry" },
-        { method: "GET", path: "/api/aqi?city=<id>", description: "Get real-time air quality, thermal inversion, and safe windows" },
+        { method: "GET", path: "/api/cities", description: "Get list of all supported cities and GPS coordinates" },
+        { method: "GET", path: "/api/aqi?city=<id>", description: "Get real-time air quality by city (e.g. city=delhi)" },
+        { method: "GET", path: "/api/aqi?lat=<lat>&lon=<lon>", description: "Get live GPS air quality anywhere worldwide (Open-Meteo)" },
         { method: "POST", path: "/api/recommendations", description: "Get tailored routines based on household vulnerability and commute" },
         { method: "POST", path: "/api/impact", description: "Calculate PM2.5 alveolar reduction and cigarette equivalents avoided" },
         { method: "POST", path: "/api/chat", description: "Ask the GenAI clean air assistant (Aura) questions" },
@@ -422,31 +496,59 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  // 3. GET /api/aqi - Air Quality Telemetry
+  // 3. GET /api/aqi - Air Quality Telemetry (supports ?city=<id> or ?lat=<lat>&lon=<lon>)
   if (req.method === 'GET' && cleanPath === '/api/aqi') {
+    const latParam = parsedUrl.searchParams.get('lat');
+    const lonParam = parsedUrl.searchParams.get('lon');
     const cityId = (parsedUrl.searchParams.get('city') || 'delhi').toLowerCase();
     const city = CITIES_DATA[cityId] || CITIES_DATA.delhi;
 
+    const targetLat = latParam ? parseFloat(latParam) : city.lat;
+    const targetLon = lonParam ? parseFloat(lonParam) : city.lon;
+
+    let liveData = null;
+    if (!isNaN(targetLat) && !isNaN(targetLon)) {
+      liveData = await fetchLiveOpenMeteo(targetLat, targetLon);
+    }
+
+    const aqi = liveData ? liveData.aqi : city.aqi;
+    const category = liveData ? liveData.category : city.category;
+    const isDanger = liveData ? liveData.isDanger : city.isDanger;
+    const pm25 = liveData ? liveData.pm25 : city.pm25;
+    const pm10 = liveData ? liveData.pm10 : city.pm10;
+    const no2 = liveData ? liveData.no2 : city.no2;
+
+    const cityName = (latParam && lonParam)
+      ? `GPS Location (${targetLat.toFixed(2)}°, ${targetLon.toFixed(2)}°)`
+      : city.name;
+    const country = (latParam && lonParam) ? "Local Device GPS" : city.country;
+
     return sendJson(res, 200, {
-      city: city.name,
-      country: city.country,
-      aqi: city.aqi,
-      category: city.category,
-      isDanger: city.isDanger,
+      city: cityName,
+      country: country,
+      aqi: aqi,
+      category: category,
+      isDanger: isDanger,
+      isLive: liveData ? true : false,
+      feedSource: liveData ? liveData.source : "Built-in Atmospheric Resilience Model",
       telemetry: {
-        pm25_ug_m3: city.pm25,
-        pm10_ug_m3: city.pm10,
-        no2_ppb: city.no2,
-        temperature_c: city.temp,
-        humidity_percent: city.humidity,
-        inversion_lid_height_meters: city.inversionHeightMeters
+        pm25_ug_m3: pm25,
+        pm10_ug_m3: pm10,
+        no2_ppb: no2,
+        temperature_c: city.temp || 15,
+        humidity_percent: city.humidity || 75,
+        inversion_lid_height_meters: city.inversionHeightMeters || 180
+      },
+      coordinates: {
+        latitude: targetLat,
+        longitude: targetLon
       },
       windows: {
-        safeVentilationWindow: city.safeVentilationWindow,
-        dangerHours: city.dangerHours
+        safeVentilationWindow: city.safeVentilationWindow || "1:00 PM – 3:00 PM",
+        dangerHours: city.dangerHours || "6:00 AM – 9:30 AM & 7:30 PM – 10:00 PM"
       },
-      healthAdvisory: city.isDanger
-        ? "Hazardous winter smog episode. Avoid outdoor exercise. Keep windows sealed during morning and evening inversion hours."
+      healthAdvisory: isDanger
+        ? "Active smog episode detected. Avoid outdoor exertion. Keep windows sealed during morning and evening inversion hours."
         : "Air quality is currently in a safe window. Suitable for normal outdoor ventilation."
     });
   }

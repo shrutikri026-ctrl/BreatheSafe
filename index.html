@@ -21,14 +21,17 @@
 
       <div class="location-picker">
         <select id="citySelect" aria-label="Select City">
-          <option value="delhi" selected>📍 Delhi-NCR (AQI 438 • Severe)</option>
-          <option value="lahore">📍 Lahore (AQI 472 • Toxic)</option>
-          <option value="beijing">📍 Beijing (AQI 184 • Smog)</option>
-          <option value="krakow">📍 Kraków (AQI 168 • Smog)</option>
-          <option value="saltlake">📍 Salt Lake City (AQI 148 • Inversion)</option>
-          <option value="milan">📍 Milan (AQI 142 • Inversion)</option>
-          <option value="clean_baseline">📍 Zurich (AQI 22 • Clean)</option>
+          <option value="delhi" selected>📍 Delhi-NCR (India)</option>
+          <option value="lahore">📍 Lahore (Pakistan)</option>
+          <option value="beijing">📍 Beijing (China)</option>
+          <option value="krakow">📍 Kraków (Poland)</option>
+          <option value="saltlake">📍 Salt Lake City (USA)</option>
+          <option value="milan">📍 Milan (Italy)</option>
+          <option value="clean_baseline">📍 Zurich (Switzerland)</option>
         </select>
+        <button id="btnGpsLocation" class="btn-gps" title="Detect real-time air quality at your current location using device GPS">
+          <span id="gpsIcon">🎯</span> <span id="gpsBtnText">My GPS</span>
+        </button>
       </div>
     </header>
 
@@ -49,8 +52,13 @@
           <div class="status-badge danger" id="statusBadge">
             <span>🔴</span> <span id="statusBadgeText">Stay Indoors (Severe Smog)</span>
           </div>
-          <div class="aqi-pill">
-            Air Pollution Level: <strong id="heroAqiNumber">438</strong> AQI
+          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+            <div class="aqi-pill">
+              Air Quality: <strong id="heroAqiNumber">438</strong> AQI
+            </div>
+            <span id="liveDataBadge" class="live-sensor-badge" style="font-size:0.75rem; font-weight:600; color:#34d399; background:rgba(52,211,153,0.12); padding:0.25rem 0.6rem; border-radius:999px; border:1px solid rgba(52,211,153,0.3); display:inline-flex; align-items:center; gap:0.3rem;">
+              <span>🟢</span> Live Open-Meteo Feed
+            </span>
           </div>
         </div>
 
@@ -342,10 +350,18 @@
         <div style="display:flex; flex-direction:column; gap:0.75rem; font-size:0.88rem;">
           <div style="background:#1e293b; padding:0.75rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
-              <strong style="color:#34d399;">GET /api/aqi?city=delhi</strong>
-              <span style="font-size:0.75rem; color:#94a3b8;">Real-time Telemetry & Safe Windows</span>
+              <strong style="color:#34d399;">GET /api/aqi?lat=28.61&lon=77.20</strong>
+              <span style="font-size:0.75rem; color:#94a3b8;">Real-Time Open-Meteo GPS Telemetry</span>
             </div>
-            <code style="font-size:0.78rem; color:#93c5fd;">curl http://localhost:3000/api/aqi?city=delhi</code>
+            <code style="font-size:0.78rem; color:#93c5fd;">curl "https://breathesafe-ff52.onrender.com/api/aqi?lat=28.6139&lon=77.2090"</code>
+          </div>
+
+          <div style="background:#1e293b; padding:0.75rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+              <strong style="color:#38bdf8;">GET /api/aqi?city=delhi</strong>
+              <span style="font-size:0.75rem; color:#94a3b8;">City Telemetry & Inversion Windows</span>
+            </div>
+            <code style="font-size:0.78rem; color:#93c5fd;">curl "https://breathesafe-ff52.onrender.com/api/aqi?city=delhi"</code>
           </div>
 
           <div style="background:#1e293b; padding:0.75rem 1rem; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
@@ -377,7 +393,8 @@
         <div style="margin-top:1.25rem;">
           <div style="font-weight:700; font-size:0.85rem; color:#94a3b8; text-transform:uppercase; margin-bottom:0.5rem;">Live API Tester (Click to query backend):</div>
           <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem;">
-            <button class="btn-action" id="btnTestAqi">Test GET /api/aqi</button>
+            <button class="btn-action" id="btnTestGps">Test GET /api/aqi (GPS)</button>
+            <button class="btn-action" id="btnTestAqi">Test GET /api/aqi (Delhi)</button>
             <button class="btn-action" id="btnTestRec">Test POST /api/recommendations</button>
             <button class="btn-action" id="btnTestImpact">Test POST /api/impact</button>
           </div>
