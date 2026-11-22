@@ -719,5 +719,47 @@ Here is the direct practical guidance based on current air telemetry in **${city
     // Initial render & sync live Open-Meteo telemetry
     updateHero();
     syncLiveAqi(null, null, state.cityId);
+
+    // Progressive Web App (PWA): Install Prompt & Service Worker Registration
+    let deferredPrompt = null;
+    const pwaBanner = document.getElementById("pwaInstallBanner");
+    const btnPwaInstall = document.getElementById("btnPwaInstall");
+    const btnPwaDismiss = document.getElementById("btnPwaDismiss");
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (pwaBanner && !localStorage.getItem("pwa_dismissed")) {
+        pwaBanner.style.display = "flex";
+      }
+    });
+
+    if (btnPwaInstall) {
+      btnPwaInstall.addEventListener("click", async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const choice = await deferredPrompt.userChoice;
+          console.log("[PWA] Install prompt choice:", choice.outcome);
+          deferredPrompt = null;
+        }
+        if (pwaBanner) pwaBanner.style.display = "none";
+      });
+    }
+
+    if (btnPwaDismiss) {
+      btnPwaDismiss.addEventListener("click", () => {
+        if (pwaBanner) pwaBanner.style.display = "none";
+        localStorage.setItem("pwa_dismissed", "true");
+      });
+    }
   });
+
+  // Register Service Worker for 100% Offline Capability
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js")
+        .then((reg) => console.log("[PWA] Service Worker registered successfully:", reg.scope))
+        .catch((err) => console.warn("[PWA] Service Worker registration failed:", err));
+    });
+  }
 })();

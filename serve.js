@@ -26,6 +26,7 @@ const MIME_TYPES = {
   '.js': 'application/javascript; charset=UTF-8',
   '.mjs': 'application/javascript; charset=UTF-8',
   '.json': 'application/json; charset=UTF-8',
+  '.webmanifest': 'application/manifest+json; charset=UTF-8',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.gif': 'image/gif',
@@ -761,11 +762,15 @@ const server = http.createServer(async (req, res) => {
         res.end(`Server Error: ${err.code}`);
       }
     } else {
-      res.writeHead(200, {
+      const headers = {
         'Content-Type': contentType,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Access-Control-Allow-Origin': '*'
-      });
+      };
+      if (reqPath === '/sw.js') {
+        headers['Service-Worker-Allowed'] = '/';
+      }
+      res.writeHead(200, headers);
       res.end(content);
     }
   });
