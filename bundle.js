@@ -6,7 +6,6 @@
   const CITIES = {
     patna: {
       name: "Patna (Bihar)",
-      aqi: 412,
       status: "Stay Indoors (Severe Smog)",
       isDanger: true,
       safeWindow: "1:30 PM – 3:30 PM",
@@ -15,7 +14,6 @@
     },
     delhi: {
       name: "Delhi-NCR",
-      aqi: 438,
       status: "Stay Indoors (Severe Smog)",
       isDanger: true,
       safeWindow: "1:30 PM – 3:00 PM",
@@ -24,7 +22,6 @@
     },
     lahore: {
       name: "Lahore",
-      aqi: 472,
       status: "Stay Indoors (Off-Scale Smog)",
       isDanger: true,
       safeWindow: "1:00 PM – 2:30 PM",
@@ -33,7 +30,6 @@
     },
     beijing: {
       name: "Beijing",
-      aqi: 184,
       status: "Unhealthy Smog (Winter Heating)",
       isDanger: true,
       safeWindow: "12:30 PM – 3:30 PM",
@@ -42,7 +38,6 @@
     },
     krakow: {
       name: "Kraków",
-      aqi: 168,
       status: "Unhealthy (Coal Heating Smog)",
       isDanger: true,
       safeWindow: "1:00 PM – 3:00 PM",
@@ -51,7 +46,6 @@
     },
     saltlake: {
       name: "Salt Lake City",
-      aqi: 148,
       status: "Sensitive Groups Alert (Valley Inversion)",
       isDanger: false,
       safeWindow: "1:30 PM – 3:30 PM",
@@ -60,7 +54,6 @@
     },
     milan: {
       name: "Milan",
-      aqi: 142,
       status: "Sensitive Groups Alert (Alpine Haze)",
       isDanger: false,
       safeWindow: "1:00 PM – 3:30 PM",
@@ -69,7 +62,6 @@
     },
     clean_baseline: {
       name: "Zurich",
-      aqi: 22,
       status: "Air is Clean & Fresh! 🟢",
       isDanger: false,
       safeWindow: "Anytime Today",
