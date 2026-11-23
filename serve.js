@@ -463,7 +463,7 @@ Here is the direct practical guidance based on current air telemetry in **${city
 }
 
 
-const server = http.createServer(async (req, res) => {
+const requestHandler = async (req, res) => {
   try {
     const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const rawPath = parsedUrl.pathname;
@@ -813,32 +813,43 @@ Provide practical, supportive, and structured advice in bold bullet points direc
     res.writeHead(500, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: "Internal Server Error", message: globalErr.message }));
   }
-});
+};
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`\n⚠️ Port ${PORT} is currently occupied by an existing process.`);
-    console.error(`Trying fallback port ${PORT + 1}...\n`);
-    setTimeout(() => {
-      server.listen(PORT + 1, () => {
-        console.log(`🛡️ Server running on fallback port ${PORT + 1}: http://localhost:${PORT + 1}`);
-      });
-    }, 1000);
-  } else {
-    console.error('Server error:', err);
-  }
-});
+const server = http.createServer(requestHandler);
 
-server.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(`🛡️ BreatheSafe & AeroShield Server Running!`);
-  console.log(`Web App:  http://localhost:${PORT}`);
-  console.log(`REST API: http://localhost:${PORT}/api/status`);
-  console.log(`Endpoints:`);
-  console.log(`  • GET  /api/aqi?city=delhi`);
-  console.log(`  • POST /api/recommendations`);
-  console.log(`  • POST /api/impact`);
-  console.log(`  • POST /api/chat`);
-  console.log(`  • GET  /api/hacks`);
-  console.log(`======================================================\n`);
-});
+const isDirectRun = process.argv[1] && (
+  process.argv[1].endsWith('serve.js') || 
+  process.argv[1] === fileURLToPath(import.meta.url)
+);
+
+if (isDirectRun) {
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n⚠️ Port ${PORT} is currently occupied by an existing process.`);
+      console.error(`Trying fallback port ${PORT + 1}...\n`);
+      setTimeout(() => {
+        server.listen(PORT + 1, () => {
+          console.log(`🛡️ Server running on fallback port ${PORT + 1}: http://localhost:${PORT + 1}`);
+        });
+      }, 1000);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+
+  server.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(`🛡️ BreatheSafe & AeroShield Server Running!`);
+    console.log(`Web App:  http://localhost:${PORT}`);
+    console.log(`REST API: http://localhost:${PORT}/api/status`);
+    console.log(`Endpoints:`);
+    console.log(`  • GET  /api/aqi?city=delhi`);
+    console.log(`  • POST /api/recommendations`);
+    console.log(`  • POST /api/impact`);
+    console.log(`  • POST /api/chat`);
+    console.log(`  • GET  /api/hacks`);
+    console.log(`======================================================\n`);
+  });
+}
+
+export { requestHandler, server, calculateUsAqi, CITIES_DATA };
