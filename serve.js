@@ -36,6 +36,25 @@ const MIME_TYPES = {
 
 // Built-in Atmospheric Data Repository (with GPS Coordinates for Live Sensor Feeds)
 const CITIES_DATA = {
+  patna: {
+    id: "patna",
+    name: "Patna (Bihar)",
+    country: "India",
+    lat: 25.5941,
+    lon: 85.1376,
+    aqi: 412,
+    category: "Severe / Hazardous",
+    isDanger: true,
+    pm25: 360,
+    pm10: 480,
+    no2: 74,
+    temp: 16,
+    humidity: 76,
+    inversionHeightMeters: 170,
+    safeVentilationWindow: "1:30 PM – 3:30 PM",
+    dangerHours: "6:00 AM – 9:30 AM & 7:00 PM – 10:30 PM",
+    sources: ["Gangetic Basin Thermal Inversion", "Brick Kilns", "Biomass & Chulha Burning", "Alluvial Road Dust"]
+  },
   delhi: {
     id: "delhi",
     name: "Delhi-NCR",

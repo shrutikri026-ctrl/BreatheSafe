@@ -4,6 +4,15 @@
 
   // 1. Data Presets
   const CITIES = {
+    patna: {
+      name: "Patna (Bihar)",
+      aqi: 412,
+      status: "Stay Indoors (Severe Smog)",
+      isDanger: true,
+      safeWindow: "1:30 PM – 3:30 PM",
+      dangerHours: "6:00 AM – 9:30 AM & 7:00 PM – 10:30 PM",
+      summary: "Dense Gangetic basin winter smog trapped by nocturnal ground cooling. Keep doors and windows tightly sealed. Midday sunshine breaks the inversion for safe errands."
+    },
     delhi: {
       name: "Delhi-NCR",
       aqi: 438,
@@ -71,7 +80,7 @@
 
   // 2. User State
   const state = {
-    cityId: "delhi",
+    cityId: "patna",
     days: 14,
     profile: {
       hasInfants: false,
