@@ -586,7 +586,7 @@ Here is the direct practical guidance based on current air telemetry in **${city
       // Fallback: If backend is unreachable but user has client key saved, call Gemini directly as fallback
       if (!replyMarkdown && savedGeminiKey && savedGeminiKey.length > 10) {
         try {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${savedGeminiKey}`;
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${savedGeminiKey}`;
           const systemContext = `You are Aura, an empathetic environmental health and atmospheric physics AI assistant. Location: ${city.name} (AQI: ${city.aqi}). Safe ventilation window: ${city.safeWindow}. Answer clearly, concisely, and warmly with bullet points.`;
           
           const res = await fetch(geminiUrl, {

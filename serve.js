@@ -684,33 +684,48 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (userApiKey && userApiKey.length > 10) {
-        try {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
-          const systemContext = `You are Aura, an AI clean air and smog resilience assistant. Current location: ${city.name} (AQI: ${city.aqi}, PM2.5: ${city.pm25} µg/m³). Inversion safe window: ${city.safeVentilationWindow}. Provide empathetic, clear, practical advice with bold bullet points.`;
+        const supportedModels = ['gemini-3.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash'];
+        const systemContext = `You are Aura, an empathetic environmental health and clean air AI assistant for BreatheSafe.
+Current Location: ${city.name} (Air Quality Index: ${city.aqi}, Category: ${city.category}, PM2.5: ${city.pm25} µg/m³).
+Safe Ventilation Window: ${city.safeVentilationWindow}.
+Danger Inversion Hours: ${city.dangerHours}.
+Provide practical, supportive, and structured advice in bold bullet points directly answering the user's question based on local atmospheric physics.`;
 
-          const fetchResp = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: `${systemContext}\n\nUSER QUESTION: ${userMessage}` }] }],
-              generationConfig: { maxOutputTokens: 600, temperature: 0.3 }
-            })
-          });
+        for (const model of supportedModels) {
+          try {
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${userApiKey}`;
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 7000);
 
-          if (fetchResp.ok) {
-            const data = await fetchResp.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-              return sendJson(res, 200, {
-                reply: text,
-                source: "Google Gemini 1.5 Flash (Live API)",
-                city: city.name,
-                aqi: city.aqi
-              });
+            const fetchResp = await fetch(geminiUrl, {
+              method: 'POST',
+              signal: controller.signal,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ role: 'user', parts: [{ text: `${systemContext}\n\nUSER QUESTION: ${userMessage}` }] }],
+                generationConfig: { maxOutputTokens: 600, temperature: 0.3 }
+              })
+            });
+            clearTimeout(timer);
+
+            if (fetchResp.ok) {
+              const data = await fetchResp.json();
+              const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text && text.trim().length > 0) {
+                return sendJson(res, 200, {
+                  reply: text,
+                  source: `Google Gemini Live AI (${model})`,
+                  city: city.name,
+                  aqi: city.aqi
+                });
+              }
+            } else {
+              const errBody = await fetchResp.text();
+              console.warn(`Gemini model ${model} HTTP ${fetchResp.status}:`, errBody.substring(0, 120));
             }
+          } catch (apiErr) {
+            console.warn(`Gemini model ${model} call exception:`, apiErr.message);
           }
-        } catch (apiErr) {
-          console.warn("Gemini Live API fetch failed, falling back to built-in neural responder:", apiErr.message);
         }
       }
 
